@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <string>
 #include <utility>
+//#include <stdexcept>
 
 namespace my_std {
     template<typename T>
@@ -13,7 +14,7 @@ namespace my_std {
         int arr_size;
         int arr_capacity;
     public:
-        MyVector() : arr_size(5), arr_capacity(20) {
+        MyVector() : arr_size(10), arr_capacity(40) {
             arr = new T[arr_capacity];
             begin_it = arr;
             end_it = &arr[arr_size];
@@ -120,29 +121,60 @@ namespace my_std {
         void insert(T* iterator_position, const int val) {
             if (arr_size >= arr_capacity) {
                 // copy
-                
+                //new_arr_capacity = arr_capacity * 1.5;
+                //T* new_arr = new T[new_arr_capacity];
+                //int i = 0;
+                //for (T* ptr = begin_it; ptr != end_it; ptr++) {
+                //    new_arr[i] = *ptr;
+                //    //iterator_position++;
+                //}
+                //iterator_position = new_arr;
+                //end_capacity = &new_arr[new_arr_capacity];
+                //for (T* ptr = iterator_position + 1; ptr != end_capacity; ptr++) {
+                //    *iterator_position = *ptr;
+                //    //iterator_position++;
+                //}
+                //iterator_position = begin_it;
+                //end_it = &new_arr[arr_size];
+                //delete[] arr;
+                //arr = new_arr;
+
+                /*new_arr_capacity = arr_capacity * 1.5;
+                T* new_arr = new T[new_arr_capacity];*/
+
             }
             // O(n)
             if (iterator_position != end()) {
                 // shift
-
+                show_vector();
+                for (T* ptr = iterator_position-1; ptr != end_capacity; ptr++) {
+                    *iterator_position = *ptr;
+                    //iterator_position++;
+                }
+                *iterator_position = val;
             }
             // O(1)
             else {
                 // no shift
-                *push_back(val);
+                push_back(val);
             }
             show_vector();
         }
         /*void insert(const T* iterator_position, int n) {
             
-        }
-        void insert(const T* iterator_begin, int n, const T* iterator_end,) {
+        }*/
+        /*void insert(const T* iterator_begin, int n, const T* iterator_end,) {
             
         }*/
         // O(n)
-        void erase() {
+        /*void erase(T* iterator_position) {
             show_vector();
+        }
+        void erase(T* iterator_position_begin, T* iterator_position_end) {
+
+        }*/
+        bool empty() {
+            return !arr_size;
         }
         T& front() {
             T& front_ref = *begin_it;
@@ -175,6 +207,32 @@ namespace my_std {
         void capacity() {
             std::cout << "vector capacity size: " << arr_capacity << "." << std::endl;
         }
+        /*T max_size() {
+            return sizeof(arr);
+        }*/
+        T& at(int i) {
+            if (i < 0 || i >= arr_size) {
+                throw std::out_of_range("out_of_range");
+            }
+            else {
+                return arr[i];
+            }
+        }
+        // O(1)
+        void clear() {
+            arr_size = 0;
+            end_it = &arr[arr_size];
+            show_vector();
+        }
+        void shrink_to_fit() {
+            // unfinished code
+            delete[] arr;
+            arr_capacity = arr_size;
+            arr = new T[arr_capacity];
+            begin_it = arr;
+            end_it = &arr[arr_size];
+            end_capacity = &arr[arr_capacity];
+        }
     };
 }
 
@@ -191,7 +249,7 @@ int main()
     my_vector.capacity();
     std::cout << "" << std::endl;
     std::cout << "my_std::resize()" << std::endl;
-    my_vector.resize(3);
+    my_vector.resize(22);
     std::cout << "" << std::endl;
     std::cout << "my_std::push_back()" << std::endl;
     my_vector.push_back(10);
@@ -215,12 +273,28 @@ int main()
     int* data_element = my_vector.data();
     std::cout << data_element << std::endl;
     std::cout << "" << std::endl;
-    /*std::cout << "my_std::insert() - some value in some position" << std::endl;
-    my_vector.insert(my_vector.begin(), 15);*/
+    std::cout << "my_std::insert() - some value in some position" << std::endl;
+    my_vector.insert(my_vector.begin() + 7, 15);
     /*std::cout << "my_std::insert() - some values in some position" << std::endl;
     my_vector.insert(my_vector.begin(), 15, 20, 25);
     std::cout << "my_std::insert() - some values in range" << std::endl;
     my_vector.insert(my_vector2, my_vector3.begin(), my_vector3.end());*/
+    std::cout << "my_std::at() (correct work)" << std::endl;
+    my_vector.at(2);
+    std::cout << "" << std::endl;
+    try {
+        std::cout << "my_std::at() (if index is invalid)" << std::endl;
+        my_vector.at(-2);
+        std::cout << "" << std::endl;
+    }
+    catch (std::out_of_range& e) {
+        std::cout << "Error: " << e.what() << std::endl;
+    }
+    std::cout << "my_std::clear()" << std::endl;
+    my_vector.clear();
+    std::cout << "We can see the 'garbage-values' because the arrive have been cleared. " << std::endl;
+    /*std::cout << "my_std::max_size()" << my_vector.max_size() << std::endl;
+    std::cout << "" << std::endl;*/
 
     // rule of five
     /*my_std::MyVector<int> my_vector2;
