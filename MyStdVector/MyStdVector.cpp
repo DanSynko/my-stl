@@ -4,8 +4,7 @@
 #include <new>
 #include <memory>
 #include <algorithm>
-
-//#include <stdexcept>
+#include <stdexcept>
 
 namespace my_std {
     template<typename T>
@@ -27,19 +26,24 @@ namespace my_std {
         friend void swap(MyVector& first, MyVector& second) {
             using std::swap;
             swap(first.arr, second.arr);
+            swap(first.begin_it, second.begin_it);
+            swap(first.end_it, second.end_it);
+            swap(first.end_capacity, second.end_capacity);
+            swap(first.arr_size, second.arr_size);
+            swap(first.arr_capacity, second.arr_capacity);
         }
 
     public:
         MyVector() : arr_size(10), arr_capacity(40) {
             arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
-            //create_some_vec_int();
-            //create_some_vec_char();
-            //create_some_vec_bool();
-            create_some_vec_obj();
-            //create_some_vec_str();
             begin_it = arr;
             end_it = &arr[arr_size];
             end_capacity = &arr[arr_capacity];
+            create_some_vec_obj();
+            //create_some_vec_int();
+            //create_some_vec_char();
+            //create_some_vec_bool();
+            //create_some_vec_str();
         } 
         MyVector(const MyVector& other) {
             std::cout << "The deep copy constructor was called: " << std::endl;
@@ -73,12 +77,13 @@ namespace my_std {
         MyVector& operator=(MyVector other) noexcept {
             using std::swap;
             swap(*this, other);
+            this->show_vector();
             return *this;
         }
         ~MyVector() {
             std::cout << "The destructor was called. " << std::endl;
             destroy_elements();
-            operator delete(arr);
+            operator delete (arr);
             begin_it = nullptr;
             end_it = nullptr;
             end_capacity = nullptr;
@@ -141,27 +146,27 @@ namespace my_std {
 
 
         void reallocation() {
-            if (arr_capacity <= arr_size) {
-                arr_capacity *= 1.5;
-                T* new_arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
-                std::uninitialized_copy(begin_it, end_it, new_arr);
-                destroy_elements();
-                operator delete (arr);
-                arr = new_arr;
-                begin_it = arr;
-                end_it = &arr[arr_size];
-                end_capacity = &arr[arr_capacity];
-            }
+            arr_capacity *= 1.5;
+            T* new_arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
+            std::uninitialized_move(begin_it, end_it, new_arr);
+            destroy_elements();
+            operator delete (arr);
+            arr = new_arr;
+            begin_it = arr;
+            end_it = &arr[arr_size];
+            end_capacity = &arr[arr_capacity];
         }
         // The method's complexity should be O(n)(linear time)
         void resize(size_t new_size) {
-            reallocation();
+            if (arr_capacity <= arr_size) {
+                reallocation();
+            }
             std::cout << "old size: " << size() << std::endl;
+            show_vector();
             size_t old_size = arr_size;
             arr_size = new_size;
             if (arr_size > old_size) {
                 for (size_t i = old_size; i < arr_size; i++) {
-                    //arr[i] = 1;
                     new (&arr[i]) T();
                 }
             }
@@ -179,7 +184,9 @@ namespace my_std {
         }
         // The method's complexity should be O(1)(constant time)
         void push_back(const T& val) {
-            reallocation();
+            if (arr_capacity <= arr_size) {
+                reallocation();
+            }
             new (end_it) T(val);
             end_it++;
             arr_size++;
@@ -218,16 +225,13 @@ namespace my_std {
         size_t size() {
             return arr_size;
         }
-        /*void reserve(const int reserved_ram) {
-            arr_capacity = reserved_ram;
-            capacity();
-        }*/
         void reserve(const size_t reserved_ram) {
             arr_capacity = reserved_ram;
             T* new_arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
             std::uninitialized_move(begin_it, end_it, new_arr);
+            destroy_elements();
             operator delete (arr);
-            new_arr = arr;
+            arr = new_arr;
             begin_it = arr;
             end_it = &arr[arr_size];
             end_capacity = &arr[arr_capacity];
@@ -254,6 +258,7 @@ namespace my_std {
             arr_capacity = arr_size;
             T* new_arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
             std::uninitialized_move(begin_it, end_it, new_arr);
+            destroy_elements();
             operator delete (arr);
             arr = new_arr;
             begin_it = arr;
@@ -270,8 +275,8 @@ class Test {
     TT* t_end_capacity;
     size_t t_size;
     size_t t_capacity;
-    int num;
-    char symb;
+    /*int num;
+    char symb;*/
     std::string text;
 
     void t_destroy_elements() {
@@ -283,37 +288,39 @@ class Test {
     friend void swap(Test& first, Test& second) {
         using std::swap;
         swap(first.t, second.t);
+        swap(first.t_end, second.t_end);
+        swap(first.t_end_capacity, second.t_end_capacity);
+        swap(first.t_size, second.t_size);
+        swap(first.t_capacity, second.t_capacity);
+        /*swap(first.num, second.num);
+        swap(first.symb, second.symb);*/
+        swap(first.text, second.text);
     }
 public:
-    Test() : t_size(2), t_capacity(5), num(1), symb('C'), text("'Test'-obj, ") {
+    Test() : t_size(3), t_capacity(5), text("'Test'-obj, ") {
         t = static_cast<TT*>(operator new(t_capacity * sizeof(TT)));
         t_end = &t[t_size];
         t_end_capacity = &t[t_capacity];
-        /*for (int i = 0; i < t_size; i++) {
-            new (&t[i]) TT();
-        }*/
-        void create_some_vec_int();
+        create_some_t_arr_int();
+        this->show_t_arr();
     }
     Test& operator=(const Test other) noexcept {
         using std::swap;
         swap(*this, other);
         return *this;
     }
-    Test(const Test& other) {
-        std::cout << "The deep copy constructor of 'Test' class was called: " << std::endl;
+    Test(const Test& other) : t_size(other.t_size), t_capacity(other.t_capacity), text(other.text) {
         this->t_capacity = other.t_capacity;
         this->t = static_cast<TT*>(operator new(this->t_capacity * sizeof(TT)));
         this->t_size = other.t_size;
         this->t_end = &this->t[this->t_size];
-        //this->t = this->arr;
-        //TT* i = this->t;
         std::uninitialized_copy(other.t, other.t_end, this->t);
         TT* new_t_end_capacity = &this->t[this->t_capacity];
         this->t_end_capacity = new_t_end_capacity;
-        this->show_vector();
+        create_some_t_arr_int();
+        this->show_t_arr();
     }
     Test(Test&& other) noexcept {
-        std::cout << "The move constructor of 'Test' class was called: " << std::endl;
         this->t_size = other.t_size;
         this->t_capacity = other.t_capacity;
         this->t = other.t;
@@ -324,24 +331,24 @@ public:
         other.t = nullptr;
         other.t_end = nullptr;
         other.t_end_capacity = nullptr;
-        this->show_vector();
+        this->show_t_arr();
     }
     Test& operator=(const Test& other) {
         using std::swap;
         swap(*this, other);
+        this->show_t_arr();
         return *this;
     }
     ~Test() {
-        std::cout << "The destructor of 'Test' class was called. " << std::endl;
         t_destroy_elements();
-        operator delete(t);
+        operator delete (t);
         t = nullptr;
         t_end = nullptr;
         t_end_capacity = nullptr;
     }
-    void show_vector() {
-        for (TT* ptr = t; ptr != t_end; ptr++) {
-            std::cout << *ptr << ". ";
+    void show_t_arr() {
+        for (TT* tptr = t; tptr != t_end; tptr++) {
+            std::cout << *tptr << ". ";
         }
         std::cout << "" << std::endl;
     }
@@ -351,25 +358,23 @@ public:
     }
     void create_some_t_arr_int() {
         for (int i = 0; i < t_size; i++) {
-            t[i] = i + 2;
+            new (&t[i]) TT(i);
         }
-        //show_vector();
     }
 };
 int main()
 {
+    std::cout << "Welcome to MyStdVector! There is a vector<custom_type>: ";
     my_std::MyVector<Test<int>> my_vector;
+    //my_std::MyVector<int> my_vector;
     //my_std::MyVector<char> my_vector;
     //my_std::MyVector<bool> my_vector;
-    //Test obj;
-    //my_std::MyVector<Test> my_vector;
-    std::cout << "Welcome to MyStdVector! There is a vector<custom_type>: ";
     //my_vector.create_some_vec_int();
     //my_vector.create_some_vec_char();
     //my_vector.create_some_vec_bool();
     std::cout << "" << std::endl;
     std::cout << "my_std::size()" << std::endl;
-    my_vector.size();
+    std::cout << my_vector.size() << std::endl;
     std::cout << "" << std::endl;
     std::cout << "my_std::capacity()" << std::endl;
     my_vector.capacity();
@@ -449,9 +454,6 @@ int main()
     else {
         std::cout << "The vector is not empty. \n" << std::endl;
     }
+
     return 0;
 }
-
-
-//                                     draft 
-// ----------------------------------------------------------------------------------
