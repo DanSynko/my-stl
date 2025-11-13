@@ -4,6 +4,7 @@ This repository I have decided to make because it can powerfully improve my know
 
 ## My goals in this global project:
 *  **std::vector;**
+*  **std::string;**
 *  **smart pointers from «memory» library;**
 *  **std::allocator;**
 *  **std::forward_list, std::list;**
@@ -15,4 +16,5 @@ This repository I have decided to make because it can powerfully improve my know
 *  **move semantic;**
 *  **Rule of Three/Five/Zero;**
 *  **placement new;**
+*  **copy-and-swap;**
 *  **Big O notation;**
