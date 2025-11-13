@@ -22,7 +22,11 @@ namespace my_std {
                 ptr->~T();
             }
         }
-
+        void update_pointers() {
+            begin_it = arr;
+            end_it = &arr[arr_size];
+            end_capacity = &arr[arr_capacity];
+        }
         friend void swap(MyVector& first, MyVector& second) {
             using std::swap;
             swap(first.arr, second.arr);
@@ -32,7 +36,21 @@ namespace my_std {
             swap(first.arr_size, second.arr_size);
             swap(first.arr_capacity, second.arr_capacity);
         }
-
+        void create_some_vec_obj() {
+            for (int i = 0; i < arr_size; i++) {
+                new (&arr[i]) T();
+            }
+            show_vector();
+        }
+        void reallocation() {
+            arr_capacity *= 1.5;
+            T* new_arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
+            std::uninitialized_move(begin_it, end_it, new_arr);
+            destroy_elements();
+            operator delete (arr);
+            arr = new_arr;
+            update_pointers();
+        }
     public:
         MyVector() : arr_size(10), arr_capacity(40) {
             arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
@@ -40,22 +58,14 @@ namespace my_std {
             end_it = &arr[arr_size];
             end_capacity = &arr[arr_capacity];
             create_some_vec_obj();
-            //create_some_vec_int();
-            //create_some_vec_char();
-            //create_some_vec_bool();
-            //create_some_vec_str();
         } 
-        MyVector(const MyVector& other) {
+        MyVector(const MyVector& other) : arr_size(other.arr_size), arr_capacity(other.arr_capacity) {
             std::cout << "The deep copy constructor was called: " << std::endl;
-            this->arr_capacity = other.arr_capacity;
             this->arr = static_cast<T*>(operator new(this->arr_capacity * sizeof(T)));
-            this->arr_size = other.arr_size;
             this->end_it = &this->arr[this->arr_size];
             this->begin_it = this->arr;
-            T* i = this->begin_it;
             std::uninitialized_copy(other.begin_it, other.end_it, this->arr);
-            T* new_end_capacity = &this->arr[this->arr_capacity];
-            this->end_capacity = new_end_capacity;
+            this->end_capacity = &this->arr[this->arr_capacity];
             std::cout << "A new vector created by deep copy constructor: " << std::endl;
             this->show_vector();
         }
@@ -101,63 +111,6 @@ namespace my_std {
                 std::cout << *ptr << ". ";
             }
             std::cout << "" << std::endl;
-        }
-
-
-        //      some code for vector inizialise by different type elements 
-
-        /*void create_some_vec_int() {
-            for (int i = 0; i < arr_size; i++) {
-                arr[i] = i+3;
-            }
-            show_vector();
-        }*/
-        /*void create_some_vec_char() {
-            int char_code_finish = 256;
-            for (int char_code_start = 0; char_code_start < char_code_finish; char_code_start++) {
-                arr[char_code_start] = static_cast<char>(char_code_start);
-                if (char_code_start == arr_size) {
-                    break;
-                }
-            }
-            show_vector();
-        }*/
-        /*void create_some_vec_bool() {
-            std::cout << std::boolalpha;
-            for (int i = 0; i < arr_size; i++) {
-                if (i % 2 == 0) {
-                    arr[i] = true;
-                }
-                else {
-                    arr[i] = false;
-                }
-            }
-            show_vector();
-        }*/
-        void create_some_vec_obj() {
-            for (int i = 0; i < arr_size; i++) {
-                new (&arr[i]) T();
-            }
-            show_vector();
-        }
-        /*void create_some_vec_str() {
-            for (int i = 0; i < arr_size; i++) {
-                arr[i] = i + 3;
-            }
-            show_vector();
-        }*/
-
-
-        void reallocation() {
-            arr_capacity *= 1.5;
-            T* new_arr = static_cast<T*>(operator new(arr_capacity * sizeof(T)));
-            std::uninitialized_move(begin_it, end_it, new_arr);
-            destroy_elements();
-            operator delete (arr);
-            arr = new_arr;
-            begin_it = arr;
-            end_it = &arr[arr_size];
-            end_capacity = &arr[arr_capacity];
         }
         // The method's complexity should be O(n)(linear time)
         void resize(size_t new_size) {
@@ -235,9 +188,7 @@ namespace my_std {
             destroy_elements();
             operator delete (arr);
             arr = new_arr;
-            begin_it = arr;
-            end_it = &arr[arr_size];
-            end_capacity = &arr[arr_capacity];
+            update_pointers();
             show_vector();
             std::cout << "Capacity size of vector above: " << capacity() << "\n" << std::endl;
         }
@@ -265,22 +216,19 @@ namespace my_std {
             destroy_elements();
             operator delete (arr);
             arr = new_arr;
-            begin_it = arr;
-            end_it = &arr[arr_size];
-            end_capacity = &arr[arr_capacity];
+            update_pointers();
             show_vector();
         }
     };
 }
 template<typename TT>
 class Test {
+private:
     TT* t;
     TT* t_end;
     TT* t_end_capacity;
     size_t t_size;
     size_t t_capacity;
-    /*int num;
-    char symb;*/
     std::string text;
 
     void t_destroy_elements() {
@@ -288,7 +236,6 @@ class Test {
             ptr->~TT();
         }
     }
-
     friend void swap(Test& first, Test& second) {
         using std::swap;
         swap(first.t, second.t);
@@ -296,9 +243,12 @@ class Test {
         swap(first.t_end_capacity, second.t_end_capacity);
         swap(first.t_size, second.t_size);
         swap(first.t_capacity, second.t_capacity);
-        /*swap(first.num, second.num);
-        swap(first.symb, second.symb);*/
         swap(first.text, second.text);
+    }
+    void create_some_t_arr_int() {
+        for (int i = 0; i < t_size; i++) {
+            new (&t[i]) TT(i);
+        }
     }
 public:
     Test() : t_size(3), t_capacity(5), text("'Test'-obj, ") {
@@ -314,9 +264,7 @@ public:
         return *this;
     }
     Test(const Test& other) : t_size(other.t_size), t_capacity(other.t_capacity), text(other.text) {
-        this->t_capacity = other.t_capacity;
         this->t = static_cast<TT*>(operator new(this->t_capacity * sizeof(TT)));
-        this->t_size = other.t_size;
         this->t_end = &this->t[this->t_size];
         std::uninitialized_copy(other.t, other.t_end, this->t);
         TT* new_t_end_capacity = &this->t[this->t_capacity];
@@ -361,23 +309,12 @@ public:
         os << other.text;
         return os;
     }
-    void create_some_t_arr_int() {
-        for (int i = 0; i < t_size; i++) {
-            new (&t[i]) TT(i);
-        }
-    }
 };
 int main()
 {
     std::cout << "Welcome to MyStdVector! There is a vector<custom_type>: " << std::endl;
     my_std::MyVector<Test<int>> my_vector;
     std::cout << "(The output of the object's memory contents(like 0, 1, 2) only occurs within its constructor.)" << std::endl;
-    //my_std::MyVector<int> my_vector;
-    //my_std::MyVector<char> my_vector;
-    //my_std::MyVector<bool> my_vector;
-    //my_vector.create_some_vec_int();
-    //my_vector.create_some_vec_char();
-    //my_vector.create_some_vec_bool();
     std::cout << "" << std::endl;
     std::cout << "my_std::size()" << std::endl;
     std::cout << my_vector.size() << std::endl;
@@ -400,24 +337,15 @@ int main()
     my_vector.reserve(50);
     std::cout << "" << std::endl;
     std::cout << "my_std::front()" << std::endl;
-    /*int& front_element = my_vector.front();
-    char& front_element = my_vector.front();*/
     Test<int>& front_element = my_vector.front();
-    //Test& front_element = my_vector.front();
     std::cout << front_element << std::endl;
     std::cout << "" << std::endl;
     std::cout << "my_std::back()" << std::endl;
-    /*int& back_element = my_vector.front();
-    char& back_element = my_vector.front();*/
     Test<int>& back_element = my_vector.front();
-    //Test& back_element = my_vector.front();
     std::cout << back_element << std::endl;
     std::cout << "" << std::endl;
     std::cout << "my_std::data()" << std::endl;
-    /*int& data_element = my_vector.front();
-    char& data_element = my_vector.front();*/
     Test<int>& data_element = my_vector.front();
-    //Test& data_element = my_vector.front();
     std::cout << data_element << std::endl;
     std::cout << "" << std::endl;
     std::cout << "my_std::at() (correct work)" << std::endl;
