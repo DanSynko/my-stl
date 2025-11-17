@@ -40,8 +40,36 @@ namespace my_std {
             update_pointers();
             show_string();
         }
+        /*MyString(MyString& other) {
+            this->str = new char[other.str_capacity];
+            char* other_temp = other.str;
+            this->str_end = other.str_end;
+            for (char* ptr = this->str; ptr != this->str_end; ptr++) {
+                *ptr = *other_temp;
+                other_temp++;
+            }
+            this->str_size = other.str_size;
+            this->str_end = other.str_end;
+            *this->str_end = '\0';
+            this->str_end_capacity = &this->str[this->str_capacity];
+        }*/
+        MyString(MyString&& other) noexcept {
+            this->str = other.str;
+            this->str_size = other.str_size;
+            this->str_capacity = other.str_capacity;
+            this->str_end = other.str_end;
+            this->str_end_capacity = other.str_end_capacity;
+            other.str_size = 0;
+            other.str_end_capacity = 0;
+            other.str = nullptr;
+            other.str_end = nullptr;
+            other.str_end_capacity = nullptr;
+        }
         ~MyString() {
             delete[] str;
+            str = nullptr;
+            str_end = nullptr;
+            str_end_capacity = nullptr;
         }
         MyString& operator=(const char* other) {
             size_t other_size = 0;
@@ -57,31 +85,74 @@ namespace my_std {
             update_pointers();
             return *this;
         }
+        char& operator[](size_t i){
+            if (i >= str_size) {
+                throw std::out_of_range("MyString out_of_range");
+            }
+            else {
+                return str[i];
+            }
+        }
         MyString& operator+=(const MyString& other) {
+            size_t new_str_size = other.str_size + this->str_size + 1;
+            char* new_str = new char[new_str_size];
+            char* new_str_start = new_str;
+            const char* ptr;
+            for (ptr = str; *ptr != *str_end; ptr++) {
+                *new_str = *ptr;
+                new_str++;
+            }
+            for (ptr = other.str; *ptr != *other.str_end; ptr++) {
+                *new_str = *ptr;
+                new_str++;
+            }
+            *new_str = '\0';
+            delete[] str;
+            delete[] other.str;
+            str = new_str_start;
             return *this;
         }
         MyString& operator+=(const char* other) {
-            return *this;
-        }
-        MyString& operator+(const MyString& other) {
-            return *this;
-        }
-        MyString& operator+(const char* other) {
-            if (str_size >= str_capacity) {
-                reallocation();
+            size_t new_str_size = 0;
+            for (const char* ptr = other; *ptr != '\0'; ptr++) {
+                new_str_size++;
             }
-            /*MyString new_str;
-            std::move(str, str_end, new_str);
-            delete[] this->str;*/
+            new_str_size += str_size + 1;
+            char* new_str = new char[new_str_size];
+            char* new_str_start = new_str;
+            const char* ptr;
+            for (ptr = str; *ptr != *str_end; ptr++) {
+                *new_str = *ptr;
+                new_str++;
+            }
+            for (ptr = other; *ptr != '\0'; ptr++) {
+                *new_str = *ptr;
+                new_str++;
+            }
+            *new_str = '\0';
+            delete[] str;
+            str = new_str_start;
             return *this;
+        }
+        MyString operator+(const MyString& second) {
+            MyString temp = *this;
+            temp += second.str;
+            return temp;
+        }
+        MyString operator+(const char* other) {
+            MyString temp = *this;
+            temp += other;
+            return temp;
         }
         friend std::ostream& operator<<(std::ostream& os, const MyString& other) {
             os << other.str;
             return os;
         }
         /*friend std::istream& operator>>(std::istream& is, MyString& other) {
-            const char* new_str = new char[1024];
-            is >> other.str;
+            delete[] other.str;
+            other.str = new char[other.str_capacity];
+            char* new_str = new char[];
+            is >> str;
             return is;
         }*/
         friend bool operator<(const MyString& first, const MyString& second) {
