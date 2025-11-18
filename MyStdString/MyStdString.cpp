@@ -24,6 +24,14 @@ namespace my_std {
             str = new_str;
             update_pointers();
         }
+        friend void swap(MyString& first, MyString& second) {
+            using std::swap;
+            swap(first.str, second.str);
+            swap(first.str_end, second.str_end);
+            swap(first.str_end_capacity, second.str_end_capacity);
+            swap(first.str_size, second.str_size);
+            swap(first.str_capacity, second.str_capacity);
+        }
     public:
         MyString() {
             str_capacity = 32;
@@ -32,8 +40,8 @@ namespace my_std {
             str_end_capacity = &str[str_capacity];
             str[0] = '\0';
         }
-        MyString(char* other_str) {
-            for (char* str_temp = other_str; *str_temp != '\0'; str_temp++) {
+        MyString(const char* other_str) {
+            for (const char* str_temp = other_str; *str_temp != '\0'; str_temp++) {
                 str_size++;
             }
             str_capacity = str_size * 1.5;
@@ -45,14 +53,15 @@ namespace my_std {
             this->str_size = other.str_size;
             this->str_capacity = other.str_capacity;
             this->str = new char[this->str_capacity];
+            this->str_end = &this->str[this->str_size];
             const char* temp = other.str;
             for (char* ptr = this->str; ptr != this->str_end; ptr++) {
                 *ptr = *temp;
                 temp++;
             }
-            this->str_end = &this->str[this->str_size];
             *this->str_end = '\0';
             this->str_end_capacity = &this->str[this->str_capacity];
+            this->show_string();
         }
         MyString(MyString&& other) noexcept {
             this->str = other.str;
@@ -65,12 +74,18 @@ namespace my_std {
             other.str = nullptr;
             other.str_end = nullptr;
             other.str_end_capacity = nullptr;
+            this->show_string();
         }
         ~MyString() {
             delete[] str;
             str = nullptr;
             str_end = nullptr;
             str_end_capacity = nullptr;
+        }
+        MyString& operator=(MyString other) noexcept {
+            std::swap(*this, other);
+            this->show_string();
+            return *this;
         }
         MyString& operator=(const char* other) {
             size_t other_size = 0;
@@ -84,8 +99,22 @@ namespace my_std {
             }
             std::move(other, &other[other_size], str);
             update_pointers();
+            this->show_string();
             return *this;
         }
+
+        static void ruleoffive_demo() {
+            my_std::MyString str;
+            str = "Hello World!";
+            str.show_string();
+            my_std::MyString str_copy_c(str);
+            my_std::MyString str_move_c;
+            str_move_c = str;
+            my_std::MyString str_copy_op = str_copy_c;
+            my_std::MyString str_move_op;
+            str_move_op = str_move_c;
+        }
+
         char& operator[](size_t i){
             if (i >= str_size) {
                 throw std::out_of_range("MyString out_of_range");
@@ -259,8 +288,29 @@ namespace my_std {
 
 int main()
 {
-    my_std::MyString str;
-    str = "Hello World!";
+    my_std::MyString::ruleoffive_demo();
+    my_std::MyString str = "Lorem ipsum";
+    my_std::MyString str2 = "Lorem ipsum";
+    my_std::MyString str3 = "dolor sit amet";
+    if (str == str2) {
+        std::cout << "Two strings is equal." << std::endl;
+    }
+    else {
+        std::cout << "Two strings is NOT equal." << std::endl;
+    }
+    if (str != str3) {
+        std::cout << "Two strings is NOT equal." << std::endl;
+    }
+    else {
+        std::cout << "Two strings is equal." << std::endl;
+    }
+    if (str < str3) {
+        std::cout << "First string is bigger." << std::endl;
+    }
+    else if (str > str3) {
+        std::cout << "Second string is bigger." << std::endl;
+    }
+    str += str3;
     str.show_string();
 
     return 0;
