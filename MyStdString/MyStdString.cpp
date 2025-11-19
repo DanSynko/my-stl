@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <utility>
 #include <algorithm>
 #include <stdexcept>
 #include <cstring>
@@ -38,14 +39,18 @@ namespace my_std {
             str = new char[str_capacity];
             str_end = &str[str_size];
             str_end_capacity = &str[str_capacity];
-            str[0] = '\0';
+            *str_end = '\0';
         }
         MyString(const char* other_str) {
-            for (const char* str_temp = other_str; *str_temp != '\0'; str_temp++) {
+            for (const char* ptr = other_str; *ptr != '\0'; ptr++) {
                 str_size++;
             }
             str_capacity = str_size * 1.5;
             str = new char[str_capacity];
+            /*for (const char* ptr = other_str; *ptr != '\0'; ptr++) {
+                str_size++;
+            }*/
+            std::copy(other_str, &other_str[str_capacity], str);
             update_pointers();
             show_string();
         }
@@ -70,7 +75,7 @@ namespace my_std {
             this->str_end = other.str_end;
             this->str_end_capacity = other.str_end_capacity;
             other.str_size = 0;
-            other.str_end_capacity = 0;
+            other.str_capacity = 0;
             other.str = nullptr;
             other.str_end = nullptr;
             other.str_end_capacity = nullptr;
@@ -83,7 +88,8 @@ namespace my_std {
             str_end_capacity = nullptr;
         }
         MyString& operator=(MyString other) noexcept {
-            std::swap(*this, other);
+            using std::swap;
+            swap(*this, other);
             this->show_string();
             return *this;
         }
@@ -97,6 +103,7 @@ namespace my_std {
                 reallocation();
                 str_size = other_size;
             }
+            str_size = other_size;
             std::move(other, &other[other_size], str);
             update_pointers();
             this->show_string();
@@ -108,8 +115,7 @@ namespace my_std {
             str = "Hello World!";
             str.show_string();
             my_std::MyString str_copy_c(str);
-            my_std::MyString str_move_c;
-            str_move_c = str;
+            my_std::MyString str_move_c = str;
             my_std::MyString str_copy_op = str_copy_c;
             my_std::MyString str_move_op;
             str_move_op = str_move_c;
@@ -138,8 +144,9 @@ namespace my_std {
             }
             *new_str = '\0';
             delete[] str;
-            delete[] other.str;
+            //delete[] other.str;
             str = new_str_start;
+            str_end = new_str;
             return *this;
         }
         MyString& operator+=(const char* other) {
@@ -184,13 +191,13 @@ namespace my_std {
             other.str_size = 0;
             const size_t temp_capacity = 256;
             char* buffer = new char[temp_capacity];
-            is >> buffer;
+            is.getline(buffer, temp_capacity);
             if (is) {
                 other.str_size = std::strlen(buffer);
                 other.str_capacity = other.str_size + 1;
                 other.str = new char[other.str_capacity];
-                std::copy(buffer, &buffer[other.str_capacity], other.str);
                 other.update_pointers();
+                std::copy(buffer, &buffer[other.str_capacity], other.str);
             }
             delete[] buffer;
             return is;
