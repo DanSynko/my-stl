@@ -84,6 +84,7 @@ namespace my_std {
                     delete current;
                     size--;
                 }
+                head = nullptr;
             }
             else {
                 return;
@@ -159,22 +160,26 @@ namespace my_std {
                     current = current->next;
                 }
                 for (size_t i = old_size; i < new_size; i++) {
-                    Node<T>* newNode = new Node<T>{ 0, nullptr };
+                    Node<T>* newNode = new Node<T>{ T(), nullptr};
                     current->next = newNode;
                     current = newNode;
                 }
             }
             else if (old_size > new_size) {
                 Node<T>* current = head;
+                Node<T>* lastNode;
                 for (size_t i = 0; i < new_size - 1; i++) {
                     current = current->next;
                 }
+                lastNode = current;
+                current = current->next;
                 Node<T>* current_for_next = nullptr;
-                while (current->next != nullptr) {
+                while (current != nullptr) {
                     current_for_next = current->next;
                     delete current;
                     current = current_for_next;
                 }
+                lastNode->next = nullptr;
             }
             else if (new_size == 0) {
                 clear();
@@ -182,6 +187,8 @@ namespace my_std {
             else {
                 return;
             }
+            this->size = new_size;
+            display();
         }
         void display() {
             if (empty()) {
