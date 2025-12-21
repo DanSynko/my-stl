@@ -69,7 +69,7 @@ namespace my_std {
 
 
 
-        Node* inorder_preccesor(Node* current) {
+        Node* inorder_predecesor(Node* current) {
             while (current != nullptr && current->right != nullptr) {
                 current = current->right;
             }
@@ -285,7 +285,7 @@ namespace my_std {
             }
             else {
                 if (current->left != nullptr && current->right != nullptr) {
-                    Node* temp = inorder_preccesor(current->left);
+                    Node* temp = inorder_predecesor(current->left);
                     Node* current_parent = current->parent;
                     int temp_data = temp->data;
                     Color current_color = current->color;
@@ -476,6 +476,40 @@ namespace my_std {
         public:
             Iterator() : ptr(nullptr) {}
 
+            Iterator& operator++() {
+                if (ptr->right != nullptr) {
+                    ptr = inorder_succesor();
+                }
+                else {
+                    if (ptr->parent != nullptr && ptr->data < ptr->parent->data) {
+                        ptr = ptr->parent;
+                    }
+                    else if (ptr->parent != nullptr && ptr->data > ptr->parent->data) {
+                        while (ptr->parent != nullptr && ptr->data > ptr->parent->data) {
+                            ptr = ptr->parent;
+                        }
+                        ptr = (ptr->parent != nullptr) ? ptr->parent : nullptr;
+                    }
+                }
+                return *this;
+            }
+            Iterator& operator--() {
+                if (ptr->left != nullptr) {
+                    ptr = inorder_predecesor();
+                }
+                else {
+                    if (ptr->parent != nullptr && ptr->data > ptr->parent->data) {
+                        ptr = ptr->parent;
+                    }
+                    else if (ptr->parent != nullptr && ptr->data < ptr->parent->data) {
+                        while (ptr->parent != nullptr && ptr->data < ptr->parent->data) {
+                            ptr = ptr->parent;
+                        }
+                        ptr = (ptr->parent != nullptr) ? ptr->parent : nullptr;
+                    }
+                }
+                return *this;
+            }
 
             bool operator==(const Iterator& other) const {
                 return ptr == other.ptr;
@@ -491,7 +525,13 @@ namespace my_std {
             }
         };
 
-
+        Iterator begin() {
+            Iterator current(root);
+            while (current->left != nullptr) {
+                current = current->left;
+            }
+            return current;
+        }
 
 
         void clear() {
@@ -528,7 +568,6 @@ namespace my_std {
             swap(first.rbt, second.rbt); // ?
         }
     public:
-
         set(std::initializer_list<T> tree) {
             for (const auto& val : tree) {
                 insert(val);
@@ -573,5 +612,6 @@ int main()
     my_std::set<int>::ruleoffive_set_demo();
 
     my_std::set<int> my_set = { 34, 436, 23, 45, 2, 5 };
+
     return 0;
 }
