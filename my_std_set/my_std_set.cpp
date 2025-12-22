@@ -5,12 +5,16 @@ namespace my_std {
 
     template <typename T>
     class RedBlackTree {
+    public:
+        class Iterator;
+        using Iterator = RedBlackTree<T>::Iterator;
     protected:
         enum Color {
             black,
             red
         };
     private:
+
         struct Node {
             T data;
             Node* right;
@@ -191,7 +195,7 @@ namespace my_std {
 
             Node* brother;
             if (double_black_node != root && deleted_parent != nullptr) {
-                brother = (double_black_node_data < deleted_parent->data) ? deleted_parent->right : deleted_parent->left;
+                brother = (double_black_node == deleted_parent->left) ? deleted_parent->right : deleted_parent->left;
             }
             else {
                 if (root != nullptr) root->color = Color::black;
@@ -287,7 +291,7 @@ namespace my_std {
                 if (current->left != nullptr && current->right != nullptr) {
                     Node* temp = inorder_predecesor(current->left);
                     Node* current_parent = current->parent;
-                    int temp_data = temp->data;
+                    T temp_data = temp->data;
                     Color current_color = current->color;
                     remove_iterative(temp, temp->data);
                     current->data = temp_data;
@@ -297,8 +301,8 @@ namespace my_std {
                     Node* temp = (current->left == nullptr) ? current->right : current->left;
                     Color current_color = current->color;
                     Node* current_parent = current->parent;
-                    int current_data = current->data;
-                    if (current->data < current->parent->data) {
+                    T current_data = current->data;
+                    if (current == current->parent->left) {
                         current->parent->left = temp;
                     }
                     else {
@@ -322,7 +326,7 @@ namespace my_std {
                     uncle->parent->color = Color::red;
                 }
                 uncle->color = Color::black;
-                if (uncle->data < uncle->parent->data) {
+                if (uncle == uncle->parent->right) {
                     uncle->parent->right->color = Color::black;
                 }
                 else {
@@ -408,6 +412,7 @@ namespace my_std {
             delete current;
         }
     public:
+
         RedBlackTree() : root(nullptr) {}
 
         RedBlackTree(std::initializer_list<T> tree) : root(nullptr) {
@@ -445,8 +450,9 @@ namespace my_std {
 
 
 
-        Node* search(const T& val) {
-            return search_recursive(root, val);
+        Iterator search(const T& val) {
+            Iterator find_val(search_recursive(root, val));
+            return find_val;
         }
         void insert(const T& val) {
             Node* next_parent = root;
@@ -478,7 +484,10 @@ namespace my_std {
 
             Iterator& operator++() {
                 if (ptr->right != nullptr) {
-                    ptr = inorder_succesor();
+                    ptr = ptr->right;
+                    while (ptr != nullptr && ptr->left != nullptr) {
+                        ptr = ptr->left;
+                    }
                 }
                 else {
                     if (ptr->parent != nullptr && ptr->data < ptr->parent->data) {
@@ -495,7 +504,10 @@ namespace my_std {
             }
             Iterator& operator--() {
                 if (ptr->left != nullptr) {
-                    ptr = inorder_predecesor();
+                    ptr = ptr->left;
+                    while (ptr != nullptr && ptr->right != nullptr) {
+                        ptr = ptr->right;
+                    }
                 }
                 else {
                     if (ptr->parent != nullptr && ptr->data > ptr->parent->data) {
@@ -520,17 +532,20 @@ namespace my_std {
             T& operator*() const {
                 return ptr->data;
             }
-            const T* operator->() {
+            T* operator->() {
                 return &(ptr->data);
             }
         };
 
         Iterator begin() {
-            Iterator current(root);
-            while (current->left != nullptr) {
+            Node* current = (root == nullptr) ? nullptr : root;
+            while (current != nullptr && current->left != nullptr) {
                 current = current->left;
             }
-            return current;
+            return Iterator(current);
+        }
+        Iterator end() {
+            return Iterator(nullptr);
         }
 
 
@@ -545,7 +560,16 @@ namespace my_std {
         const size_t size() const {
             return tree_size;
         }
+        bool contains(const T& val) {
+            if (root == nullptr) return false;
 
+            Node* current = root;
+            while (current != nullptr && current->data != val) {
+                current = (current->data < val) ? current->right : current->left;
+            }
+
+            return current != nullptr;
+        }
 
 
 
@@ -562,6 +586,7 @@ namespace my_std {
     template<typename T>
     class set {
     private:
+        using Iterator = typename RedBlackTree<T>::Iterator;
         RedBlackTree<T> rbt;
         friend void swap(set& first, set& second) {
             using std::swap;
@@ -586,8 +611,19 @@ namespace my_std {
         void erase(const T& val) {
             rbt.remove(val);
         }
+        Iterator find(const T& val) {
+            rbt.search(val);
+        }
+
         bool contains(const T& val) {
-            return (rbt.search(val)) ? true : false;
+            return rbt.contains(val);
+        }
+
+        Iterator begin() {
+            return rbt.begin();
+        }
+        Iterator end() {
+            return rbt.end();
         }
 
         const size_t size() const {
@@ -611,7 +647,13 @@ int main()
 
     my_std::set<int>::ruleoffive_set_demo();
 
-    my_std::set<int> my_set = { 34, 436, 23, 45, 2, 5 };
+    my_std::set<int> my_set = { 34, 436, 23, 23, 45, 2, 2, 5 };
 
+    auto it = my_set.begin();
+    ++it;
+    --it;
+    while (*it != 436) {
+        ++it;
+    }
     return 0;
 }
