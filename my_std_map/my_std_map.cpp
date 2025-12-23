@@ -95,16 +95,16 @@ namespace my_std {
 
 
 
-        Node* search_recursive(Node* current, const Key& pair) {
+        Node* search_recursive(Node* current, const Key& key) {
             if (current == nullptr) {
                 return nullptr;
             }
-            if (current->data.first != pair.first) {
-                if (current->data.first > pair.first) {
-                    return search_recursive(current->left, pair);
+            if (current->data.first != key) {
+                if (current->data.first > key) {
+                    return search_recursive(current->left, key);
                 }
                 else {
-                    return search_recursive(current->right, pair);
+                    return search_recursive(current->right, key);
                 }
             }
             return current;
@@ -266,12 +266,12 @@ namespace my_std {
                 return fixup_properties_insert(current);
             }
         }
-        void remove_iterative(Node* current, const Key& pair) {
-            while (current != nullptr && current->data.first != pair.first) {
-                if (pair.first < current->data.first) {
+        void remove_iterative(Node* current, const Key& key) {
+            while (current != nullptr && current->data.first != key) {
+                if (key < current->data.first) {
                     current = current->left;
                 }
-                else if (pair.first > current->data.first) {
+                else if (key > current->data.first) {
                     current = current->right;
                 }
             }
@@ -295,10 +295,14 @@ namespace my_std {
                 if (current->left != nullptr && current->right != nullptr) {
                     Node* temp = inorder_predecesor(current->left);
                     Node* current_parent = current->parent;
-                    value_type temp_data = temp->data;
+                    const Key temp_data = temp->data.first;
                     Color current_color = current->color;
-                    remove_iterative(temp, temp->data);
-                    current->data = temp_data;
+                    remove_iterative(temp, temp->data.first);
+
+                    //current->data.first = temp_data;
+
+                    const_cast<Key&>(current->data.first) = temp_data;
+                    //current->data.second = temp_data.second;
                     tree_size--;
                 }
                 else if (current->left == nullptr || current->right == nullptr) {
@@ -555,7 +559,7 @@ namespace my_std {
 
 
         void clear() {
-            postorder_delete_recursive();
+            postorder_delete_recursive(root);
             root = nullptr;
             tree_size = 0;
         }
@@ -565,16 +569,26 @@ namespace my_std {
         const size_t size() const {
             return tree_size;
         }
-        bool contains(const Key& val) {
+        bool contains(const Key& val) const {
             if (root == nullptr) return false;
 
             Node* current = root;
-            while (current != nullptr && current->data != val) {
-                current = (current->data < val) ? current->right : current->left;
+            while (current != nullptr && current->data.first != val) {
+                current = (current->data.first < val) ? current->right : current->left;
             }
 
             return current != nullptr;
         }
+        Value& at(const Key& key) {
+            if (contains(key)) {
+                return (*search(key)).second;
+            }
+            else {
+                throw std::out_of_range("std::out_of_range: key not found");
+            }
+        }
+
+
 
         static void ruleoffive_rbt_pair_demo() {
             my_std::RedBlackTree<std::string, int> rbt_example = {
@@ -618,6 +632,18 @@ namespace my_std {
             return *this;
         }
 
+        Value& operator[](const Key& key) {
+            if (contains(key)) {
+                return (*find(key)).second;
+            }
+            else {
+                insert({ key, Value() });
+                return (*find(key)).second;
+            }
+        }
+        Value& at(const Key& key) {
+            return rbt.at(key);
+        }
 
         void insert(const value_type& pair) {
             rbt.insert(pair);
@@ -626,10 +652,9 @@ namespace my_std {
             rbt.remove(pair);
         }
         Iterator find(const Key& pair) {
-            rbt.search(pair);
+            return rbt.search(pair);
         }
-
-        bool contains(const Key& pair) {
+        bool contains(const Key& pair) const {
             return rbt.contains(pair);
         }
 
@@ -642,6 +667,10 @@ namespace my_std {
 
         const size_t size() const {
             return rbt.size();
+        }
+
+        void clear() {
+            rbt.clear();
         }
 
         bool empty() {
@@ -657,7 +686,7 @@ namespace my_std {
 }
 int main()
 {
-    std::cout << "Welcome to my_std_set! There is a set<T> on red-black tree: " << std::endl;
+    std::cout << "Welcome to my_std_map! There is a map<const Key, Value> on red-black tree: " << std::endl;
 
     my_std::map<std::string, int>::ruleoffive_map_demo();
 
@@ -667,10 +696,27 @@ int main()
         {"hours in day", 24},
         {"Google company formation", 1998}
     };
-
+    my_map.insert({"Nvidia company formation", 1993});
+    my_map.erase("current year");
+    my_map.find("Google company formation");
     auto it = my_map.begin();
     ++it;
     --it;
+
+    try {
+        my_map.at("Intel");
+    }
+    catch (std::out_of_range e) {
+        std::cout << e.what() << std::endl;
+    }
+
+    my_map.clear();
+    if (!my_map.contains("current month")) 
+        std::cout << "not found." << std::endl;
+
+    if (my_map.empty())
+        std::cout << "map is empty." << std::endl;
+
 
     return 0;
 }
