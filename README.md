@@ -21,12 +21,12 @@ This repository is dedicated to implementing some Standard Template Library, lik
 *  **Rule of Three/Five/Zero;**
 *  **placement new;**
 *  **copy-and-swap;**
-*  **Big O notation;**
-*  **Recursion;**
 *  **Pointer to pointer;**
 *  **"using" keyword;**
 ### Computer Science:
-* **what is linked list and how it works;**
+* **Data Structures:** Linked lists.
+* **Big O notation**
+* **Recursion**
 
 ## Extra:
 * **Language: C++**
