@@ -323,14 +323,14 @@ int main()
     std::cout << "my_std::list.erase_after()." << std::endl;
     auto it_erase = init_list.begin();
     init_list.erase_after(it_erase);
-    std::cout << "my_std::MyForwardList.resize() (to bigger size)." << std::endl;
+    std::cout << "my_std::list.resize() (to bigger size)." << std::endl;
     init_list.resize(10);
-    std::cout << "my_std::MyForwardList.resize() (to smaller size)." << std::endl;
+    std::cout << "my_std::list.resize() (to smaller size)." << std::endl;
     init_list.resize(3);
-    std::cout << "my_std::MyForwardList.clear()." << std::endl;
+    std::cout << "my_std::list.clear()." << std::endl;
     init_list.clear();
     init_list.display();
-    std::cout << "my_std::MyForwardList.empty()." << std::endl;
+    std::cout << "my_std::list.empty()." << std::endl;
     if (init_list.empty()) {
         std::cout << "forward list is empty." << std::endl;
     }

@@ -22,7 +22,7 @@
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{5830bb64-9241-4fac-915d-0a7e444bfcd0}</ProjectGuid>
-    <RootNamespace>MyStdList</RootNamespace>
+    <RootNamespace>mystdlist</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>my_std_list</ProjectName>
   </PropertyGroup>

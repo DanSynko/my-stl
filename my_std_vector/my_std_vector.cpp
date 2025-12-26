@@ -312,7 +312,7 @@ public:
 };
 int main()
 {
-    std::cout << "Welcome to MyStdVector! There is a vector<custom_type>: " << std::endl;
+    std::cout << "Welcome to my_std_vector! There is a vector<custom_type>: " << std::endl;
     my_std::vector<Test<int>> my_vector;
     std::cout << "(The output of the object's memory contents(like 0, 1, 2) only occurs within its constructor.)" << std::endl;
     std::cout << "" << std::endl;
