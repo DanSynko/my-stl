@@ -9,7 +9,7 @@ This repository is dedicated to implementing some Standard Template Library, lik
 *  **std::set, std::map;**
 *  **std::unordered_set, std::unordered_map;**
 
-## Completed:
+## My goals:
 *  **smart pointers from «memory» library;**
 *  **std::allocator;**
 *  **std::deque;**
